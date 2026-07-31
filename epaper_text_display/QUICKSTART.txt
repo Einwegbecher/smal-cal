@@ -1,0 +1,79 @@
+================================================================================
+QUICK START GUIDE - 2.15" B E-Paper Text Display
+================================================================================
+
+STEP 1: CONNECT THE DISPLAY
+---------------------------
+Connect your 2.15" B E-Paper display to Raspberry Pi GPIO pins:
+
+  E-Paper Pin  ->  Raspberry Pi GPIO  ->  Physical Pin
+  -----------------------------------------------------
+  RST          ->  GPIO 17            ->  Pin 11
+  DC           ->  GPIO 25            ->  Pin 22
+  CS           ->  GPIO 8             ->  Pin 24
+  BUSY         ->  GPIO 24            ->  Pin 18
+  PWR          ->  GPIO 18            ->  Pin 12
+  MOSI         ->  GPIO 10            ->  Pin 19
+  SCLK         ->  GPIO 11            ->  Pin 23
+  GND          ->  GND                ->  Pin 6, 9, 14, etc.
+  VCC          ->  3.3V               ->  Pin 1 or 17
+
+STEP 2: ENABLE SPI
+------------------
+Run: sudo raspi-config
+Navigate to: Interface Options -> SPI -> Enable
+Reboot your Raspberry Pi
+
+STEP 3: INSTALL DEPENDENCIES
+---------------------------
+Run: sudo apt update
+Run: sudo apt install gcc make libgpiod-dev
+
+STEP 4: BUILD THE PROGRAM
+--------------------------
+cd /path/to/epaper_text_display
+make clean
+make
+
+STEP 5: RUN THE PROGRAM
+------------------------
+sudo ./epaper_text_display
+
+STEP 6: WHAT TO EXPECT
+----------------------
+The program will:
+1. Initialize the display (takes ~2 seconds)
+2. Clear the screen
+3. Display "Hello World!" with some graphics
+4. Show technical info: "2.15\" B E-Paper", "Display Demo", "160x296 pixels"
+5. Display numbers: 123456789, 987654321
+6. Show shapes and more text
+7. Clean up and exit after ~8 seconds
+
+STEP 7: CUSTOMIZE (OPTIONAL)
+---------------------------
+Edit main.c to change the displayed text:
+- Find the display_text() function
+- Modify Paint_DrawString_EN() calls to change text
+- Adjust positions (X, Y coordinates) as needed
+
+STEP 8: TROUBLESHOOTING
+-----------------------
+Problem: Compilation errors
+Solution: Check that libgpiod-dev is installed
+
+Problem: Permission denied when running
+Solution: Use sudo: sudo ./epaper_text_display
+
+Problem: Display not responding
+Solution: Check wiring connections, especially GND and VCC
+
+Problem: SPI errors
+Solution: Ensure SPI is enabled in raspi-config
+
+Problem: White screen only
+Solution: Check that all GPIO pins are connected correctly
+
+================================================================================
+ENJOY YOUR E-PAPER DISPLAY!
+================================================================================
