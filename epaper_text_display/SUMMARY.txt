@@ -1,0 +1,122 @@
+================================================================================
+2.15" B E-PAPER TEXT DISPLAY PROGRAM - SUMMARY
+================================================================================
+
+PROGRAM OVERVIEW:
+-----------------
+A complete C program that displays text on a 2.15" B (Black/Red) E-Paper 
+display using the Waveshare library. The program demonstrates how to initialize
+the display, draw text and graphics, and properly clean up resources.
+
+PROGRAM STRUCTURE:
+------------------
+epaper_text_display/
+├── main.c                 # Main application with text display logic
+├── Makefile              # Build configuration for Raspberry Pi
+├── README.md             # Complete documentation and usage guide
+├── SUMMARY.txt           # This file
+└── lib/
+    ├── Config/           # Hardware abstraction layer
+    │   ├── DEV_Config.h  # Hardware configuration headers
+    │   ├── DEV_Config.c  # GPIO and SPI initialization
+    │   ├── Debug.h       # Debug output functions
+    │   ├── RPI_gpiod.h   # GPIO access for Raspberry Pi
+    │   ├── RPI_gpiod.c   # GPIO implementation
+    │   ├── dev_hardware_SPI.h  # SPI interface headers
+    │   └── dev_hardware_SPI.c  # SPI implementation
+    ├── e-Paper/           # E-Paper display driver
+    │   ├── EPD_2in15b.h   # 2.15" B E-Paper headers
+    │   └── EPD_2in15b.c   # Display initialization and control
+    ├── GUI/               # Graphics library
+    │   ├── GUI_Paint.h   # Drawing functions headers
+    │   └── GUI_Paint.c   # Text and graphics drawing
+    └── Fonts/             # Font definitions
+        ├── fonts.h       # Font structure definitions
+        ├── font8.c       # 8px font data
+        ├── font12.c      # 12px font data
+        ├── font16.c      # 16px font data (used in demo)
+        ├── font20.c      # 20px font data
+        ├── font24.c      # 24px font data
+        ├── font12CN.c    # 12px Chinese font data
+        └── font24CN.c    # 24px Chinese font data
+
+KEY FEATURES:
+-------------
+1. Text Display: Draws English text using various font sizes
+2. Graphics: Supports lines, rectangles, circles
+3. Color Support: Uses both black and red colors
+4. Memory Management: Proper allocation and cleanup
+5. Error Handling: Graceful handling of initialization failures
+6. Signal Handling: Clean exit on Ctrl+C
+
+DISPLAY SPECIFICATIONS:
+-----------------------
+- Display Type: 2.15" B E-Paper (Black/Red)
+- Resolution: 160 x 296 pixels
+- Interface: SPI
+- Color Depth: 2-bit (Black, White, Red)
+
+USAGE:
+------
+1. Connect the E-Paper display to Raspberry Pi GPIO pins
+2. Install dependencies: sudo apt install gcc make libgpiod-dev
+3. Build: make
+4. Run: sudo ./epaper_text_display
+
+GPIO CONNECTIONS (Default):
+---------------------------
+- RST  -> GPIO 17 (Pin 11)
+- DC   -> GPIO 25 (Pin 22)
+- CS   -> GPIO 8  (Pin 24)
+- BUSY -> GPIO 24 (Pin 18)
+- PWR  -> GPIO 18 (Pin 12)
+- MOSI -> GPIO 10 (Pin 19)
+- SCLK -> GPIO 11 (Pin 23)
+
+PROGRAM FLOW:
+-------------
+1. Initialize hardware module (GPIO and SPI)
+2. Initialize E-Paper display
+3. Allocate memory for image buffers
+4. Clear the display
+5. Display "Hello World!" message with graphics
+6. Display technical information (160x296, 2.15" B)
+7. Display numbers and shapes
+8. Clean up memory and hardware
+9. Exit gracefully
+
+CUSTOMIZATION:
+--------------
+- Edit main.c to change displayed text and graphics
+- Modify Makefile to use different GPIO libraries
+- Change DEV_Config.c to use different GPIO pins
+- Add new fonts or graphics as needed
+
+DEPENDENCIES:
+-------------
+- GCC (GNU Compiler Collection)
+- Make (build tool)
+- libgpiod-dev (recommended for GPIO access)
+  OR libbcm2835-dev
+  OR libwiringpi-dev
+  OR liblgpio-dev
+
+COMPATIBILITY:
+--------------
+- Raspberry Pi (all models with GPIO)
+- Other Linux systems with GPIO access
+- Can be adapted for Jetson Nano (see original library)
+
+NOTES:
+------
+- The program requires root privileges (sudo) to access GPIO
+- SPI must be enabled in Raspberry Pi configuration
+- The display uses a 3-color system: Black, White, Red
+- Memory usage: ~6KB for image buffers (160x296 / 8 * 2)
+
+CREDITS:
+--------
+- Waveshare team for the original e-Paper library
+- This program adapts and simplifies the library for text display
+
+================================================================================
