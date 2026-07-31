@@ -60,7 +60,40 @@ OBJS = $(SRCS:.c=.o)
 TARGET = epaper_text_display
 
 # Default target
-all: $(TARGET)
+all: check_dependencies $(TARGET)
+
+# Check for required dependencies
+check_dependencies:
+	@echo "Checking dependencies..."
+	@if [ "$(USE_DEV_LIB)" = "1" ]; then \
+		if ! pkg-config --exists libgpiod; then \
+			echo "ERROR: libgpiod-dev is required but not installed."; \
+			echo "Install it with: sudo apt install libgpiod-dev"; \
+			exit 1; \
+		fi; \
+	fi
+	@if [ "$(USE_BCM2835_LIB)" = "1" ]; then \
+		if ! pkg-config --exists libbcm2835; then \
+			echo "ERROR: libbcm2835-dev is required but not installed."; \
+			echo "Install it with: sudo apt install libbcm2835-dev"; \
+			exit 1; \
+		fi; \
+	fi
+	@if [ "$(USE_WIRINGPI_LIB)" = "1" ]; then \
+		if ! pkg-config --exists libwiringpi; then \
+			echo "ERROR: libwiringpi-dev is required but not installed."; \
+			echo "Install it with: sudo apt install libwiringpi-dev"; \
+			exit 1; \
+		fi; \
+	fi
+	@if [ "$(USE_LGPIO_LIB)" = "1" ]; then \
+		if ! pkg-config --exists liblgpio; then \
+			echo "ERROR: liblgpio-dev is required but not installed."; \
+			echo "Install it with: sudo apt install liblgpio-dev"; \
+			exit 1; \
+		fi; \
+	fi
+	@echo "All dependencies are installed."
 
 # Build executable
 $(TARGET): $(OBJS)
@@ -81,4 +114,10 @@ rebuild: clean all
 run: $(TARGET)
 	sudo ./$(TARGET)
 
-.PHONY: all clean rebuild run
+# Install dependencies
+install_deps:
+	@echo "Installing dependencies for USE_DEV_LIB (recommended)..."
+	sudo apt update
+	sudo apt install -y libgpiod-dev
+
+.PHONY: all clean rebuild run check_dependencies install_deps

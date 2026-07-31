@@ -44,12 +44,20 @@ The program uses the following GPIO pins by default (Raspberry Pi):
 
 ### 1. Install Dependencies
 
-For the recommended configuration (USE_DEV_LIB):
+For the recommended configuration (USE_DEV_LIB = libgpiod):
 
 ```bash
 sudo apt update
 sudo apt install gcc make libgpiod-dev
 ```
+
+**OR** for other library options:
+
+- **USE_BCM2835_LIB**: `sudo apt install gcc make libbcm2835-dev`
+- **USE_WIRINGPI_LIB**: `sudo apt install gcc make libwiringpi-dev`
+- **USE_LGPIO_LIB**: `sudo apt install gcc make liblgpio-dev`
+
+**Note**: Only one library is needed. The default in the Makefile is `USE_DEV_LIB = 1` which requires `libgpiod-dev`.
 
 For other configurations:
 
