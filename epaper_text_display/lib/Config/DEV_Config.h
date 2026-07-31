@@ -67,8 +67,8 @@
         #define LFLAGS 0
         #define NUM_MAXBUF  4
     #elif USE_DEV_LIB
-        #include "RPI_gpiod.h"
-        #include "dev_hardware_SPI.h"
+        #include "sysfs_gpio.h"
+        #include "sysfs_software_spi.h"
     #endif
 #endif
 

@@ -58,7 +58,7 @@ void DEV_Digital_Write(UWORD Pin, UBYTE Value)
 #elif  USE_LGPIO_LIB  
     lgGpioWrite(GPIO_Handle, Pin, Value);
 #elif USE_DEV_LIB
-	GPIOD_Write(Pin, Value);
+	SYSFS_GPIO_Write(Pin, Value);
 #endif
 #endif
 
@@ -82,7 +82,7 @@ UBYTE DEV_Digital_Read(UWORD Pin)
 #elif  USE_LGPIO_LIB  
     Read_value = lgGpioRead(GPIO_Handle,Pin);
 #elif USE_DEV_LIB
-	Read_value = GPIOD_Read(Pin);
+	Read_value = SYSFS_GPIO_Read(Pin);
 #endif
 #endif
 
@@ -109,7 +109,7 @@ void DEV_SPI_WriteByte(uint8_t Value)
 #elif  USE_LGPIO_LIB 
     lgSpiWrite(SPI_Handle,(char*)&Value, 1);
 #elif USE_DEV_LIB
-	DEV_HARDWARE_SPI_TransferByte(Value);
+	SYSFS_software_spi_transfer(Value);
 #endif
 #endif
 
@@ -133,7 +133,9 @@ void DEV_SPI_Write_nByte(uint8_t *pData, uint32_t Len)
 #elif  USE_LGPIO_LIB 
     lgSpiWrite(SPI_Handle,(char*)pData, Len);
 #elif USE_DEV_LIB
-	DEV_HARDWARE_SPI_Transfer(pData, Len);
+	for(uint32_t i = 0; i < Len; i++) {
+		SYSFS_software_spi_transfer(pData[i]);
+	}
 #endif
 #endif
 
@@ -179,11 +181,11 @@ void DEV_GPIO_Mode(UWORD Pin, UWORD Mode)
         // printf("OUT Pin = %d\r\n",Pin);
     }
 #elif USE_DEV_LIB
-    if(Mode == 0 || Mode == GPIOD_IN) {
-        GPIOD_Direction(Pin, GPIOD_IN);
+    if(Mode == 0 || Mode == 0) {
+        SYSFS_GPIO_Direction(Pin, 0);
         // Debug("IN Pin = %d\r\n",Pin);
     } else {
-        GPIOD_Direction(Pin, GPIOD_OUT);
+        SYSFS_GPIO_Direction(Pin, 1);
         // Debug("OUT Pin = %d\r\n",Pin);
     }
 #endif
@@ -441,11 +443,17 @@ UBYTE DEV_Module_Init(void)
     SPI_Handle = lgSpiOpen(0, 0, 10000000, 0);
     DEV_GPIO_Init();
 #elif USE_DEV_LIB
-	printf("Write and read /dev/spidev0.0 \r\n");
-    GPIOD_Export();
-	DEV_GPIO_Init();
-	DEV_HARDWARE_SPI_begin("/dev/spidev0.0");
-    DEV_HARDWARE_SPI_setSpeed(10000000);
+	printf("Using sysfs GPIO interface \r\n");
+    DEV_GPIO_Init();
+	SYSFS_GPIO_Export(EPD_CS_PIN);
+	SYSFS_GPIO_Export(EPD_RST_PIN);
+	SYSFS_GPIO_Export(EPD_DC_PIN);
+	SYSFS_GPIO_Export(EPD_BUSY_PIN);
+	SYSFS_GPIO_Export(EPD_PWR_PIN);
+	SYSFS_software_spi_begin();
+	SYSFS_software_spi_setBitOrder(SOFTWARE_SPI_MSBFIRST);
+	SYSFS_software_spi_setDataMode(SOFTWARE_SPI_Mode0);
+	SYSFS_software_spi_setClockDivider(SOFTWARE_SPI_CLOCK_DIV4);
 #endif
 
 #elif JETSON
@@ -496,22 +504,22 @@ void DEV_Module_Exit(void)
     // lgSpiClose(SPI_Handle);
     // lgGpiochipClose(GPIO_Handle);
 #elif USE_DEV_LIB
-	DEV_HARDWARE_SPI_end();
+	SYSFS_software_spi_end();
 	DEV_Digital_Write(EPD_CS_PIN, 0);
     DEV_Digital_Write(EPD_PWR_PIN, 0);
 	DEV_Digital_Write(EPD_DC_PIN, 0);
 	DEV_Digital_Write(EPD_RST_PIN, 0);
-    GPIOD_Unexport(EPD_PWR_PIN);
-    GPIOD_Unexport(EPD_DC_PIN);
-    GPIOD_Unexport(EPD_RST_PIN);
-    GPIOD_Unexport(EPD_BUSY_PIN);
-    GPIOD_Unexport_GPIO();
+    SYSFS_GPIO_Unexport(EPD_CS_PIN);
+    SYSFS_GPIO_Unexport(EPD_RST_PIN);
+    SYSFS_GPIO_Unexport(EPD_DC_PIN);
+    SYSFS_GPIO_Unexport(EPD_BUSY_PIN);
+    SYSFS_GPIO_Unexport(EPD_PWR_PIN);
 #endif
 
 #elif JETSON
 #ifdef USE_DEV_LIB
 	SYSFS_GPIO_Unexport(EPD_CS_PIN);
-    SYSFS_GPIO_Unexport(EPD_PWR_PIN;
+	SYSFS_GPIO_Unexport(EPD_PWR_PIN);
 	SYSFS_GPIO_Unexport(EPD_DC_PIN);
 	SYSFS_GPIO_Unexport(EPD_RST_PIN);
 	SYSFS_GPIO_Unexport(EPD_BUSY_PIN);

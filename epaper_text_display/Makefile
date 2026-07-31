@@ -9,9 +9,17 @@ CC = gcc
 PLATFORM = RPI
 
 # Library selection for Raspberry Pi (uncomment one)
+# For Raspberry Pi, you can use:
+# - USE_SYSFS_GPIO = 1 (no external libraries needed, recommended)
+# - USE_BCM2835_LIB = 1 (requires libbcm2835-dev)
+# - USE_WIRINGPI_LIB = 1 (requires libwiringpi-dev)
+# - USE_DEV_LIB = 1 (requires libgpiod-dev)
+# - USE_LGPIO_LIB = 1 (requires liblgpio-dev)
+
+USE_SYSFS_GPIO = 1
 # USE_BCM2835_LIB = 1
 # USE_WIRINGPI_LIB = 1
-USE_DEV_LIB = 1
+# USE_DEV_LIB = 1
 # USE_LGPIO_LIB = 1
 
 # Compiler flags
@@ -20,7 +28,10 @@ CFLAGS = -Wall -Wextra -O2 -g
 # Platform-specific flags
 ifeq ($(PLATFORM), RPI)
     CFLAGS += -D RPI
-    ifeq ($(USE_BCM2835_LIB), 1)
+    ifeq ($(USE_SYSFS_GPIO), 1)
+        CFLAGS += -D USE_DEV_LIB
+        LDFLAGS += -lm
+    else ifeq ($(USE_BCM2835_LIB), 1)
         CFLAGS += -D USE_BCM2835_LIB
         LDFLAGS += -lbcm2835 -lm
     else ifeq ($(USE_WIRINGPI_LIB), 1)
@@ -42,7 +53,8 @@ INCLUDES = -I./lib/Config -I./lib/e-Paper -I./lib/GUI -I./lib/Fonts
 SRCS = main.c \
        lib/e-Paper/EPD_2in15b.c \
        lib/Config/DEV_Config.c \
-       lib/Config/RPI_gpiod.c \
+       lib/Config/sysfs_gpio.c \
+       lib/Config/sysfs_software_spi.c \
        lib/Config/dev_hardware_SPI.c \
        lib/GUI/GUI_Paint.c \
        lib/Fonts/font8.c \
@@ -65,29 +77,29 @@ all: check_dependencies $(TARGET)
 # Check for required dependencies
 check_dependencies:
 	@echo "Checking dependencies..."
-	@if [ "$(USE_DEV_LIB)" = "1" ]; then \
-		if ! pkg-config --exists libgpiod; then \
-			echo "ERROR: libgpiod-dev is required but not installed."; \
-			echo "Install it with: sudo apt install libgpiod-dev"; \
-			exit 1; \
-		fi; \
-	fi
 	@if [ "$(USE_BCM2835_LIB)" = "1" ]; then \
-		if ! pkg-config --exists libbcm2835; then \
+		if ! pkg-config --exists libbcm2835 2>/dev/null; then \
 			echo "ERROR: libbcm2835-dev is required but not installed."; \
 			echo "Install it with: sudo apt install libbcm2835-dev"; \
 			exit 1; \
 		fi; \
 	fi
 	@if [ "$(USE_WIRINGPI_LIB)" = "1" ]; then \
-		if ! pkg-config --exists libwiringpi; then \
+		if ! pkg-config --exists libwiringpi 2>/dev/null; then \
 			echo "ERROR: libwiringpi-dev is required but not installed."; \
 			echo "Install it with: sudo apt install libwiringpi-dev"; \
 			exit 1; \
 		fi; \
 	fi
+	@if [ "$(USE_DEV_LIB)" = "1" ]; then \
+		if ! pkg-config --exists libgpiod 2>/dev/null; then \
+			echo "ERROR: libgpiod-dev is required but not installed."; \
+			echo "Install it with: sudo apt install libgpiod-dev"; \
+			exit 1; \
+		fi; \
+	fi
 	@if [ "$(USE_LGPIO_LIB)" = "1" ]; then \
-		if ! pkg-config --exists liblgpio; then \
+		if ! pkg-config --exists liblgpio 2>/dev/null; then \
 			echo "ERROR: liblgpio-dev is required but not installed."; \
 			echo "Install it with: sudo apt install liblgpio-dev"; \
 			exit 1; \
@@ -114,10 +126,9 @@ rebuild: clean all
 run: $(TARGET)
 	sudo ./$(TARGET)
 
-# Install dependencies
+# Install dependencies for sysfs_gpio (no external libs needed)
 install_deps:
-	@echo "Installing dependencies for USE_DEV_LIB (recommended)..."
-	sudo apt update
-	sudo apt install -y libgpiod-dev
+	@echo "No external libraries needed for sysfs_gpio!"
+	@echo "The program uses /sys/class/gpio interface directly."
 
 .PHONY: all clean rebuild run check_dependencies install_deps
